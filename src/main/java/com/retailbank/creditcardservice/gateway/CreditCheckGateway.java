@@ -22,7 +22,14 @@ public class CreditCheckGateway {
                 .path("credit-scores")
                 .toUriString();
 
-        return restTemplate.postForObject(uri, new CreditCheckRequest(citizenNumber), CreditCheckResponse.class);
+        final CreditCheckRequest request = new CreditCheckRequest(citizenNumber);
+        final CreditCheckResponse creditCheckResponse = restTemplate.postForObject(uri, request, CreditCheckResponse.class);
+
+        if (!creditCheckResponse.getUuid().equals(request.getUuid())) {
+            throw new RuntimeException("If these don't match something horrible happens");
+        }
+
+        return creditCheckResponse;
     }
 
 }
