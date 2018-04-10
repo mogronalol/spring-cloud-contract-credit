@@ -17,6 +17,7 @@ public class CreditScoreListener {
 
     @StreamListener(Sink.INPUT)
     public void receiveScore(CreditCheckResponse creditCheckResponse) {
+        System.out.println("HELLO WORLD");
         creditScoreRepository.save(creditCheckResponse.getUuid(), creditCheckResponse.getScore());
     }
 }
