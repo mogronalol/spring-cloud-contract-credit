@@ -1,6 +1,8 @@
 package com.retailbank.creditcardservice;
 
+import com.retailbank.creditcardservice.gateway.CreditCheckRequest;
 import com.retailbank.creditcardservice.gateway.CreditCheckResponse.Score;
+import com.retailbank.creditcardservice.producer.CreditScoreProducer;
 import com.retailbank.creditcardservice.repository.CreditScoreRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@AutoConfigureStubRunner(ids = "com.retailbank:creditcheckservice:+:stubs:8080", workOffline = true)
+@AutoConfigureStubRunner(ids = "com.retailbank:creditcheckservice:+:stubs", workOffline = true)
 public class CreditcardserviceApplicationMessagingTests {
 
     @Autowired
@@ -24,6 +26,9 @@ public class CreditcardserviceApplicationMessagingTests {
 
     @Autowired
     private CreditScoreRepository creditScoreRepository;
+
+    @Autowired
+    private CreditScoreProducer creditScoreProducer;
 
     @Test
     public void shouldStoreResultsOfACreditCheck() {
@@ -36,6 +41,19 @@ public class CreditcardserviceApplicationMessagingTests {
         // Then
         final Score score = creditScoreRepository.getScore(uuid);
 
+        assertThat(score).isEqualTo(Score.HIGH);
+    }
+
+    @Test
+    public void shouldOutputCreditScoreWhenRequestingCreditScore() {
+        // Given
+        creditScoreProducer.requestScore(new CreditCheckRequest(1234));
+        final UUID uuid = UUID.fromString("e2a8b899-6b62-4010-81f1-9faed24fed2b");
+
+        // When
+        final Score score = creditScoreRepository.getScore(uuid);
+
+        // Then
         assertThat(score).isEqualTo(Score.HIGH);
     }
 
